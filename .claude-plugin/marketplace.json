@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "learning-log",
+  "description": "Automatic learning journal for Claude Code: learnings, decisions and mistakes, with approval and spaced review.",
+  "owner": {
+    "name": "SritejCanchi"
+  },
+  "plugins": [
+    {
+      "name": "learning-log",
+      "description": "Auto-capture learnings, decisions and mistakes from every session into a local Markdown log.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

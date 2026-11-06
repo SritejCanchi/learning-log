@@ -1,0 +1,12 @@
+{
+  "name": "learning-log",
+  "version": "0.1.0",
+  "description": "Automatically captures learnings, decisions and mistakes at session end into a local Markdown log, with approval and spaced review.",
+  "author": {
+    "name": "SritejCanchi",
+    "url": "https://github.com/SritejCanchi"
+  },
+  "repository": "https://github.com/SritejCanchi/learning-log",
+  "license": "MIT",
+  "keywords": ["learning", "journal", "decisions", "mistakes", "spaced-repetition", "hooks"]
+}
