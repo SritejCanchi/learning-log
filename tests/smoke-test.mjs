@@ -117,5 +117,42 @@ hook("capture.mjs", "SessionEnd", headless);
 assert.equal(ls("pending").length, 0);
 ok("headless claude -p runs are not logged and get no reminder");
 
+// 8. The CLI used by the skills: approve, score, discard, add, draft.
+function cli(args, input = "") {
+  const r = spawnSync(process.execPath, [path.join(ROOT, "scripts", "log.mjs"), ...args], { input, encoding: "utf8", env: baseEnv });
+  assert.equal(r.status, 0, `log.mjs ${args.join(" ")} failed: ${r.stderr}`);
+  return r.stdout;
+}
+const plusDays = (n) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+const fmOf = (dir, f) => fs.readFileSync(path.join(dataDir, dir, f), "utf8");
+
+assert.match(cli(["list"]), /DRAFTS \(1\)[\s\S]*DUE FOR REVIEW \(1\)/);
+assert.match(cli(["approve", draftName]), /approved/);
+assert.equal(ls("drafts").length, 0);
+assert.match(fmOf("entries", draftName), new RegExp(`status: approved[\\s\\S]*review_due: ${plusDays(14)}`));
+ok("cli approve moves the draft and schedules review in 14 days");
+
+assert.match(cli(["score", "old.md", "5"]), /next review/);
+assert.match(fmOf("entries", "old.md"), new RegExp(`review_due: ${plusDays(14)}[\\s\\S]*reviews: 1`));
+cli(["score", "old.md", "4"]);
+assert.match(fmOf("entries", "old.md"), new RegExp(`review_due: ${plusDays(28)}`));
+cli(["score", "old.md", "1"]);
+assert.match(fmOf("entries", "old.md"), new RegExp(`review_due: ${plusDays(3)}`));
+ok("cli score follows the spaced schedule (14, 28, then 3 after a miss)");
+
+const body = "TITLE: Manual note\nTAGS: notes\n\n## Learnings\n- Something.\n";
+assert.match(cli(["add", "--project", "my-app"], body), /saved: .*_my-app_manual\.md/);
+ok("cli add saves an approved manual entry");
+
+fs.writeFileSync(path.join(dataDir, "pending", "p.md"), "---\nproject: my-app\nsession: s\nsource: auto (SessionEnd)\n---\n");
+assert.match(cli(["draft", "p.md"], body), /drafted/);
+assert.match(cli(["discard", "p.md"]), /discarded/);
+assert.ok(fs.existsSync(path.join(dataDir, "drafts", ".discarded", "p.md")));
+ok("cli draft and discard (discard keeps the file)");
+
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`\nall ${step} checks passed`);

@@ -95,6 +95,11 @@ It starts working in your next session.
 Spaced review: first review 14 days after approval. Then a score of 1-2 brings it back in
 3 days, 3 in 14 days, and 4-5 doubles the interval each time (max 180 days).
 
+Permissions: the skills change the log only through `node .../scripts/log.mjs`. Claude Code
+asks before the first run; choose "don't ask again" and reviews run without prompts.
+(Direct file edits under `~/.claude/` would prompt every time, because Claude Code treats
+that folder as sensitive.)
+
 ## Your data
 
 Everything stays in `~/.claude/learning-log/` as plain Markdown:

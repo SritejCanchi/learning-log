@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { DIRS, ensureDirs, log, today, readFrontmatter, listMd } from "./common.mjs";
+import { DIRS, ensureDirs, log, today, readFrontmatter, listMd, parseBody, buildEntry } from "./common.mjs";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MODEL = process.env.LEARNING_LOG_MODEL || "sonnet";
@@ -73,43 +73,16 @@ async function main() {
   ].join("\n");
 
   const out = await runClaude(prompt);
-  if (/^\s*NOTHING_TO_LOG\s*$/.test(out)) {
+  const parsed = parseBody(out);
+  if (!parsed) {
     fs.unlinkSync(pendingFile);
     log(`nothing to log: ${path.basename(pendingFile)}`);
     return;
   }
-  const title = (out.match(/^TITLE:\s*(.+)$/m)?.[1] || "Untitled session").trim();
-  const tags = (out.match(/^TAGS:\s*(.+)$/m)?.[1] || "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-  const sections = out.replace(/^TITLE:.*$/m, "").replace(/^TAGS:.*$/m, "").trim();
-  if (!/^## /m.test(sections)) throw new Error(`unexpected output: ${out.slice(0, 200)}`);
-
-  const entry = [
-    "---",
-    `title: ${title.replace(/\r?\n/g, " ")}`,
-    `date: ${today()}`,
-    `project: ${fm.project}`,
-    `cwd: ${fm.cwd}`,
-    `session: ${fm.session}`,
-    `source: ${fm.source}`,
-    `tags: [${tags.join(", ")}]`,
-    "status: draft",
-    "review_due:",
-    "last_reviewed:",
-    "review_score:",
-    "reviews: 0",
-    "---",
-    "",
-    `# ${title}`,
-    "",
-    sections,
-    "",
-  ].join("\n");
-  fs.writeFileSync(path.join(DIRS.drafts, path.basename(pendingFile)), entry);
+  const meta = { project: fm.project, cwd: fm.cwd, session: fm.session, source: fm.source, status: "draft" };
+  fs.writeFileSync(path.join(DIRS.drafts, path.basename(pendingFile)), buildEntry(meta, parsed));
   fs.unlinkSync(pendingFile);
-  log(`drafted ${path.basename(pendingFile)}: ${title}`);
+  log(`drafted ${path.basename(pendingFile)}: ${parsed.title}`);
 }
 
 main()

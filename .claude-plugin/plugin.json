@@ -1,6 +1,6 @@
 {
   "name": "learning-log",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Automatically captures learnings, decisions and mistakes at session end into a local Markdown log, with approval and spaced review.",
   "author": {
     "name": "SritejCanchi",
