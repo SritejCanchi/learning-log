@@ -10,6 +10,14 @@ No command to remember. If you forget to log, nothing is lost.
 Learning log: 2 drafts to approve, 1 entry due for review. Run /learning-log:review
 ```
 
+<p align="center">
+  <img src="docs/review-demo.png" alt="A /learning-log:review session: approving an auto-drafted entry, then answering a spaced-review quiz and scoring recall 4/5" width="720">
+</p>
+
+<sub>A real `/learning-log:review` run: approve the draft auto-captured from the session that
+built this plugin, then answer a due quiz and score your recall. The upload-service entry is
+demo data.</sub>
+
 ## Why
 
 Engineering learning logs die in one of two ways:
